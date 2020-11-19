@@ -1,30 +1,54 @@
 import torch
-import torchvision.transforms as transforms
-import torchvision.datasets as dset
+import torch.utils.data as data
+import numpy as np
 
 # Directory containing the data.
-root = 'data/celeba'
+root = 'data/cmb_data'
 
-def get_celeba(params):
+def get_celeba(params, ):
     """
     Loads the dataset and applies proproccesing steps to it.
     Returns a PyTorch DataLoader.
 
     """
-    # Data proprecessing.
-    transform = transforms.Compose([
-        transforms.Resize(params['imsize']),
-        transforms.CenterCrop(params['imsize']),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5),
-            (0.5, 0.5, 0.5))])
+    # Data pr
+    true_dataset = Dataset(params['file_path'])
+    masked_dataset = Dataset(params['file_path'], mask_file = params['mask'], mask=True)
 
+    
     # Create the dataset.
-    dataset = dset.ImageFolder(root=root, transform=transform)
+    
 
     # Create the dataloader.
-    dataloader = torch.utils.data.DataLoader(dataset,
+    true_dataloader = torch.utils.data.DataLoader(true_dataset,
         batch_size=params['bsize'],
-        shuffle=True)
+        shuffle=False)
 
-    return dataloader
+    masked_dataloader = torch.utils.data.DataLoader(masked_dataset,
+    batch_size=params['bsize'],
+    shuffle=False)
+
+
+    return true_dataloader, masked_dataloader
+
+class Dataset(data.Dataset):
+    def __init__(self, file_path, mask_file=None, mask=False):
+        """
+        Args:
+            csv_file (string): Path to the csv file with annotations.
+        """
+        super(data.Dataset, self).__init__()
+        self.npmaps = np.load(file_path)
+        self.mask = mask
+        if mask==True:
+            self.mask_vec = np.load(mask_file)
+
+    def __len__(self):
+        return len(self.npmaps)
+
+    def __getitem__(self, idx):
+        sample = self.npmaps[idx]
+        if self.mask==True:
+            masked_sample = sample*self.mask_vec
+            return torch.Tensor(masked_sample)
+        return torch.Tensor(sample)

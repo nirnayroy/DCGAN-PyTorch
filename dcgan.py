@@ -19,39 +19,41 @@ class Generator(nn.Module):
     def __init__(self, params):
         super().__init__()
 
-        # Input is the latent vector Z.
-        self.tconv1 = nn.ConvTranspose2d(params['nz'], params['ngf']*8,
-            kernel_size=4, stride=1, padding=0, bias=False)
-        self.bn1 = nn.BatchNorm2d(params['ngf']*8)
+        # Input Dimension: (nc) x 280 x 140
+        self.conv1 = nn.Conv2d(params['nc'], params['ndf'],
+             4, 2, 1, bias=False)
+        self.bn1 = nn.BatchNorm2d(params['ndf'])
 
-        # Input Dimension: (ngf*8) x 4 x 4
-        self.tconv2 = nn.ConvTranspose2d(params['ngf']*8, params['ngf']*4,
-            4, 2, 1, bias=False)
-        self.bn2 = nn.BatchNorm2d(params['ngf']*4)
+        # Input Dimension: (ndf) x 140 x 70
+        self.conv2 = nn.Conv2d(params['ndf'], params['ndf']*2,
+             4, 2, 1, bias=False)
+        self.bn2 = nn.BatchNorm2d(params['ndf']*2)
 
-        # Input Dimension: (ngf*4) x 8 x 8
-        self.tconv3 = nn.ConvTranspose2d(params['ngf']*4, params['ngf']*2,
-            4, 2, 1, bias=False)
-        self.bn3 = nn.BatchNorm2d(params['ngf']*2)
+        self.conv3 = nn.Conv2d(params['ndf']*2, params['ndf']*4,
+             4, 2, 1, bias=False)
+        self.bn3 = nn.BatchNorm2d(params['ndf']*4)
 
-        # Input Dimension: (ngf*2) x 16 x 16
-        self.tconv4 = nn.ConvTranspose2d(params['ngf']*2, params['ngf'],
-            4, 2, 1, bias=False)
-        self.bn4 = nn.BatchNorm2d(params['ngf'])
+        self.tconv1 = nn.ConvTranspose2d(params['ndf']*4, params['ndf']*2,
+             4, 2, 1, bias=False)
+        self.bn4 = nn.BatchNorm2d(params['ndf']*2)
 
-        # Input Dimension: (ngf) * 32 * 32
-        self.tconv5 = nn.ConvTranspose2d(params['ngf'], params['nc'],
+        # Input Dimension: (ngf*2) x 70 x 35
+        self.tconv2 = nn.ConvTranspose2d(params['ngf']*2, params['ngf'],
             4, 2, 1, bias=False)
-        #Output Dimension: (nc) x 64 x 64
+        self.bn5 = nn.BatchNorm2d(params['ngf'])
+
+        # Input Dimension: (ngf) * 140 * 70
+        self.tconv3 = nn.ConvTranspose2d(params['ngf'], params['nc'],
+            4, 2, 1, bias=False)
+        #Output Dimension: (nc) x 280 x 140
 
     def forward(self, x):
-        x = F.relu(self.bn1(self.tconv1(x)))
-        x = F.relu(self.bn2(self.tconv2(x)))
-        x = F.relu(self.bn3(self.tconv3(x)))
-        x = F.relu(self.bn4(self.tconv4(x)))
-
-        x = F.tanh(self.tconv5(x))
-
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = F.relu(self.bn4(self.tconv1(x)))
+        x = F.relu(self.bn5(self.tconv2(x)))
+        x = F.tanh(self.tconv3(x))
         return x
 
 # Define the Discriminator Network
@@ -81,12 +83,15 @@ class Discriminator(nn.Module):
         # Input Dimension: (ndf*8) x 4 x 4
         self.conv5 = nn.Conv2d(params['ndf']*8, 1, 4, 1, 0, bias=False)
 
+
+
     def forward(self, x):
         x = F.leaky_relu(self.conv1(x), 0.2, True)
         x = F.leaky_relu(self.bn2(self.conv2(x)), 0.2, True)
         x = F.leaky_relu(self.bn3(self.conv3(x)), 0.2, True)
         x = F.leaky_relu(self.bn4(self.conv4(x)), 0.2, True)
-
-        x = F.sigmoid(self.conv5(x))
-
+        x = F.relu(self.conv5(x))
+        x = F.relu(nn.Linear(70, 40)(torch.flatten(x, start_dim=1)))
+        x = F.relu(nn.Linear(40, 10)(x))
+        x = torch.sigmoid((nn.Linear(10, 1)(x)))
         return x

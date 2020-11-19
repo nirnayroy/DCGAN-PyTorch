@@ -18,9 +18,10 @@ print("Random Seed: ", seed)
 
 # Parameters to define the model.
 params = {
+    "file_path" : 'data/cmb_data/dataset/train_CMB_2DMaps_ex10000_res280x140.npy',
+    "mask" : 'data/cmb_data/dataset/kp2_mask_processed_nside16_res280x140.npy',
     "bsize" : 128,# Batch size during training.
-    'imsize' : 64,# Spatial size of training images. All images will be resized to this size during preprocessing.
-    'nc' : 3,# Number of channles in the training images. For coloured images this is 3.
+    'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
     'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
     'ndf' : 64, # Size of features maps in the discriminator. The depth will be multiples of this.
@@ -34,7 +35,8 @@ device = torch.device("cuda:0" if(torch.cuda.is_available()) else "cpu")
 print(device, " will be used.\n")
 
 # Get the data.
-dataloader = get_celeba(params)
+true_dataloader, masked_dataloader = get_celeba(params)
+'''
 
 # Plot the training images.
 sample_batch = next(iter(dataloader))
@@ -45,7 +47,7 @@ plt.imshow(np.transpose(vutils.make_grid(
     sample_batch[0].to(device)[ : 64], padding=2, normalize=True).cpu(), (1, 2, 0)))
 
 plt.show()
-
+'''
 # Create the generator.
 netG = Generator(params).to(device)
 # Apply the weights_init() function to randomly initialize all
@@ -88,9 +90,14 @@ print("Starting Training Loop...")
 print("-"*25)
 
 for epoch in range(params['nepochs']):
-    for i, data in enumerate(dataloader, 0):
+    for i, data in enumerate(zip(true_dataloader, masked_dataloader), 0):
         # Transfer data tensor to GPU/CPU (device)
-        real_data = data[0].to(device)
+        real_data, masked_data = data
+        real_data.resize_((128, 1, 140, 280))
+        masked_data.resize_((128, 1, 140, 280))
+        print(list(real_data.shape))
+        real_data.to(device)
+        masked_data.to(device)
         # Get batch size. Can be different from params['nbsize'] for last batch in epoch.
         b_size = real_data.size(0)
         
@@ -98,16 +105,20 @@ for epoch in range(params['nepochs']):
         netD.zero_grad()
         # Create labels for the real data. (label=1)
         label = torch.full((b_size, ), real_label, device=device)
-        output = netD(real_data).view(-1)
+        output = netD(real_data)
+        print(list(output.shape)) 
+        print(list(label.shape))       
+        output = output.view(-1)
+        print(label.shape, output.shape)
         errD_real = criterion(output, label)
         # Calculate gradients for backpropagation.
         errD_real.backward()
         D_x = output.mean().item()
         
         # Sample random data from a unit normal distribution.
-        noise = torch.randn(b_size, params['nz'], 1, 1, device=device)
+        #noise = torch.randn(b_size, params['nz'], 1, 1, device=device)
         # Generate fake data (images).
-        fake_data = netG(noise)
+        fake_data = netG(masked_data)
         # Create labels for fake data. (label=0)
         label.fill_(fake_label  )
         # Calculate the output of the discriminator of the fake data.
