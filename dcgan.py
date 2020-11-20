@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+device = torch.device("cuda:0" if(torch.cuda.is_available()) else "cpu")
 def weights_init(w):
     """
     Initializes the weights of the layer, w.
@@ -53,7 +53,7 @@ class Generator(nn.Module):
         x = F.relu(self.bn3(self.conv3(x)))
         x = F.relu(self.bn4(self.tconv1(x)))
         x = F.relu(self.bn5(self.tconv2(x)))
-        x = F.tanh(self.tconv3(x))
+        x = torch.tanh(self.tconv3(x))
         return x
 
 # Define the Discriminator Network
@@ -91,7 +91,7 @@ class Discriminator(nn.Module):
         x = F.leaky_relu(self.bn3(self.conv3(x)), 0.2, True)
         x = F.leaky_relu(self.bn4(self.conv4(x)), 0.2, True)
         x = F.relu(self.conv5(x))
-        x = F.relu(nn.Linear(70, 40)(torch.flatten(x, start_dim=1)))
-        x = F.relu(nn.Linear(40, 10)(x))
-        x = torch.sigmoid((nn.Linear(10, 1)(x)))
+        x = F.relu(nn.Linear(70, 40).to(device)(torch.flatten(x, start_dim=1)))
+        x = F.relu(nn.Linear(40, 10).to(device)(x))
+        x = torch.sigmoid((nn.Linear(10, 1).to(device)(x)))
         return x

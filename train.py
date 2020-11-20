@@ -10,6 +10,9 @@ import random
 from utils import get_celeba
 from dcgan import weights_init, Generator, Discriminator
 
+
+torch.cuda.empty_cache()
+
 # Set random seed for reproducibility.
 seed = 369
 random.seed(seed)
@@ -18,8 +21,8 @@ print("Random Seed: ", seed)
 
 # Parameters to define the model.
 params = {
-    "file_path" : 'train_data.npy',
-    "mask" : 'mask.npy',
+    "file_path" : 'train_CMB_2DMaps_ex10000_res280x140.npy',
+    "mask" : 'kp2_mask_processed_nside16_res280x140.npy',
     "bsize" : 128,# Batch size during training.
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
@@ -49,18 +52,21 @@ plt.imshow(np.transpose(vutils.make_grid(
 plt.show()
 '''
 # Create the generator.
-netG = Generator(params).to(device)
+netG = Generator(params)
+
 # Apply the weights_init() function to randomly initialize all
 # weights to mean=0.0, stddev=0.2
 netG.apply(weights_init)
+netG = netG.to(device)
 # Print the model.
 print(netG)
 
 # Create the discriminator.
-netD = Discriminator(params).to(device)
+netD = Discriminator(params)
 # Apply the weights_init() function to randomly initialize all
 # weights to mean=0.0, stddev=0.2
 netD.apply(weights_init)
+netD = netD.to(device)
 # Print the model.
 print(netD)
 
@@ -95,9 +101,10 @@ for epoch in range(params['nepochs']):
         real_data, masked_data = data
         real_data.resize_((128, 1, 140, 280))
         masked_data.resize_((128, 1, 140, 280))
-        print(list(real_data.shape))
-        real_data.to(device)
-        masked_data.to(device)
+        #print(list(real_data.shape))
+        real_data = real_data.to(device)
+        masked_data = masked_data.to(device)
+        
         # Get batch size. Can be different from params['nbsize'] for last batch in epoch.
         b_size = real_data.size(0)
         
@@ -106,10 +113,10 @@ for epoch in range(params['nepochs']):
         # Create labels for the real data. (label=1)
         label = torch.full((b_size, ), real_label, device=device)
         output = netD(real_data)
-        print(list(output.shape)) 
-        print(list(label.shape))       
+        #print(list(output.shape)) 
+        #print(list(label.shape))       
         output = output.view(-1)
-        print(label.shape, output.shape)
+        #print(label.shape, output.shape)
         errD_real = criterion(output, label)
         # Calculate gradients for backpropagation.
         errD_real.backward()
@@ -118,7 +125,7 @@ for epoch in range(params['nepochs']):
         # Sample random data from a unit normal distribution.
         #noise = torch.randn(b_size, params['nz'], 1, 1, device=device)
         # Generate fake data (images).
-        fake_data = netG(masked_data)
+        fake_data = netG(masked_data).to(device)
         # Create labels for fake data. (label=0)
         label.fill_(fake_label  )
         # Calculate the output of the discriminator of the fake data.
@@ -127,7 +134,8 @@ for epoch in range(params['nepochs']):
         # discriminator parameters will be calculated.
         # This is done because the loss functions for the discriminator
         # and the generator are slightly different.
-        output = netD(fake_data.detach()).view(-1)
+        output = netD(fake_data.detach().cuda()
+                      ).view(-1)
         errD_fake = criterion(output, label)
         # Calculate gradients for backpropagation.
         errD_fake.backward()
@@ -145,7 +153,7 @@ for epoch in range(params['nepochs']):
         label.fill_(real_label)
         # No detach() is used here as we want to calculate the gradients w.r.t.
         # the generator this time.
-        output = netD(fake_data).view(-1)
+        output = netD(fake_data).to(device).view(-1)
         errG = criterion(output, label)
         # Gradients for backpropagation are calculated.
         # Gradients w.r.t. both the generator and the discriminator
@@ -162,7 +170,7 @@ for epoch in range(params['nepochs']):
         if i%50 == 0:
             print(torch.cuda.is_available())
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-                  % (epoch, params['nepochs'], i, len(dataloader),
+                  % (epoch, params['nepochs'], i, len(true_dataloader),
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
 
         # Save the losses for plotting.
@@ -172,7 +180,7 @@ for epoch in range(params['nepochs']):
         # Check how the generator is doing by saving G's output on a fixed noise.
         if (iters % 100 == 0) or ((epoch == params['nepochs']-1) and (i == len(dataloader)-1)):
             with torch.no_grad():
-                fake_data = netG(fixed_noise).detach().cpu()
+                fake_data = netG(masked_data).detach().cpu()
             img_list.append(vutils.make_grid(fake_data, padding=2, normalize=True))
 
         iters += 1
