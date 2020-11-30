@@ -178,7 +178,7 @@ for epoch in range(params['nepochs']):
         D_losses.append(errD.item())
 
         # Check how the generator is doing by saving G's output on a fixed noise.
-        if (iters % 100 == 0) or ((epoch == params['nepochs']-1) and (i == len(dataloader)-1)):
+        if (iters % 100 == 0) or ((epoch == params['nepochs']-1) and (i == len(true_dataloader)-1)):
             with torch.no_grad():
                 fake_data = netG(masked_data).detach().cpu()
             img_list.append(vutils.make_grid(fake_data, padding=2, normalize=True))
