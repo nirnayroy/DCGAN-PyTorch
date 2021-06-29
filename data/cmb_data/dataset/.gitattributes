@@ -1,1 +1,0 @@
-'train_CMB_2DMaps_ex10000_res280x140.npy' filter=lfs diff=lfs merge=lfs -text
