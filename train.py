@@ -102,8 +102,8 @@ for epoch in range(params['nepochs']):
         real_data.resize_((128, 1, 140, 280))
         masked_data.resize_((128, 1, 140, 280))
         #print(list(real_data.shape))
-        real_data = torch.float(real_data.to(device))
-        masked_data = torch.float(masked_data.to(device))
+        real_data = torch.float(real_data).to(device)
+        masked_data = torch.float(masked_data).to(device)
         
         # Get batch size. Can be different from params['nbsize'] for last batch in epoch.
         b_size = real_data.size(0)
