@@ -134,8 +134,7 @@ for epoch in range(params['nepochs']):
         # discriminator parameters will be calculated.
         # This is done because the loss functions for the discriminator
         # and the generator are slightly different.
-        output = netD(fake_data.detach().cuda()
-                      ).view(-1)
+        output = netD(fake_data.detach()).view(-1)
         errD_fake = criterion(output, label)
         # Calculate gradients for backpropagation.
         errD_fake.backward()
