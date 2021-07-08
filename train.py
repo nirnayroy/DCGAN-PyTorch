@@ -21,8 +21,8 @@ print("Random Seed: ", seed)
 
 # Parameters to define the model.
 params = {
-    "file_path" : './train.npy',
-    "mask" : './mask.npy',
+    "file_path" : 'train.npy',
+    "mask" : 'mask.npy',
     "bsize" : 128,# Batch size during training.
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
