@@ -102,8 +102,8 @@ for epoch in range(params['nepochs']):
         real_data.resize_((128, 1, 140, 280))
         masked_data.resize_((128, 1, 140, 280))
         #print(list(real_data.shape))
-        real_data = real_data.float().to(device)
-        masked_data = masked_data.float().to(device)
+        real_data = real_data.to(device)
+        masked_data = masked_data.to(device)
         
         # Get batch size. Can be different from params['nbsize'] for last batch in epoch.
         b_size = real_data.size(0)
@@ -117,7 +117,7 @@ for epoch in range(params['nepochs']):
         #print(list(label.shape))       
         output = output.view(-1)
         #print(label.shape, output.shape)
-        errD_real = criterion(output, label)
+        errD_real = criterion(output.float(), label.float())
         # Calculate gradients for backpropagation.
         errD_real.backward()
         D_x = output.mean().item()
@@ -154,7 +154,7 @@ for epoch in range(params['nepochs']):
         # No detach() is used here as we want to calculate the gradients w.r.t.
         # the generator this time.
         output = netD(fake_data).to(device).view(-1)
-        errG = criterion(output, label)
+        errG = criterion(output.float(), label.float())
         # Gradients for backpropagation are calculated.
         # Gradients w.r.t. both the generator and the discriminator
         # parameters are calculated, however, the generator's optimizer
