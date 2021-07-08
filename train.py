@@ -135,7 +135,7 @@ for epoch in range(params['nepochs']):
         # This is done because the loss functions for the discriminator
         # and the generator are slightly different.
         output = netD(fake_data.detach()).view(-1)
-        errD_fake = criterion(output, label)
+        errD_fake = criterion(output.float(), label.float())
         # Calculate gradients for backpropagation.
         errD_fake.backward()
         D_G_z1 = output.mean().item()
