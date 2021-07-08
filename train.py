@@ -167,7 +167,6 @@ for epoch in range(params['nepochs']):
 
         # Check progress of training.
         if i%50 == 0:
-            print(torch.cuda.is_available())
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
                   % (epoch, params['nepochs'], i, len(true_dataloader),
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
