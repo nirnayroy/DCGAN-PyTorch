@@ -23,7 +23,7 @@ print("Random Seed: ", seed)
 params = {
     "file_path" : 'train.npy',
     "mask" : 'mask.npy',
-    "bsize" : 256,# Batch size during training.
+    "bsize" : 512,# Batch size during training.
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
     'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
@@ -99,8 +99,8 @@ for epoch in range(params['nepochs']):
     for i, data in enumerate(zip(true_dataloader, masked_dataloader), 0):
         # Transfer data tensor to GPU/CPU (device)
         real_data, masked_data = data
-        real_data.resize_((128, 1, 140, 280))
-        masked_data.resize_((128, 1, 140, 280))
+        real_data.resize_(([params[b_size], 1, 140, 280))
+        masked_data.resize_(([params[b_size], 1, 140, 280))
         #print(list(real_data.shape))
         real_data = real_data.to(device)
         masked_data = masked_data.to(device)
@@ -173,7 +173,7 @@ for epoch in range(params['nepochs']):
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
         with torch.no_grad():
             fake_data = netG(masked_data).detach().cpu().numpy()
-            plt.imshow(fake_data)
+            plt.imshow(fake_data[0,:,:,0])
         torch.save({
             'generator' : netG.state_dict(),
             'discriminator' : netD.state_dict(),
