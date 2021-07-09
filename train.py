@@ -99,8 +99,8 @@ for epoch in range(params['nepochs']):
     for i, data in enumerate(zip(true_dataloader, masked_dataloader), 0):
         # Transfer data tensor to GPU/CPU (device)
         real_data, masked_data = data
-        real_data.resize_((params[b_size], 1, 140, 280))
-        masked_data.resize_((params[b_size], 1, 140, 280))
+        real_data.resize_((params[bsize], 1, 140, 280))
+        masked_data.resize_((params[bsize], 1, 140, 280))
         #print(list(real_data.shape))
         real_data = real_data.to(device)
         masked_data = masked_data.to(device)
