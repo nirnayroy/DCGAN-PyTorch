@@ -31,7 +31,7 @@ params = {
     'nepochs' : 10,# Number of training epochs.
     'lr' : 0.0002,# Learning rate for optimizers
     'beta1' : 0.5,# Beta1 hyperparam for Adam optimizer
-    'save_epoch' : 2}# Save step.
+    'save_epoch' : 1}# Save step.
 
 # Use GPU is available else use CPU.
 device = torch.device("cuda:0" if(torch.cuda.is_available()) else "cpu")
@@ -163,6 +163,7 @@ for epoch in range(params['nepochs']):
         D_G_z2 = output.mean().item()
         # Update generator parameters.
         optimizerG.step()
+        print(i)
         iters += 1
 
     # Save the model.
