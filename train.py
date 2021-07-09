@@ -23,7 +23,7 @@ print("Random Seed: ", seed)
 params = {
     "file_path" : 'train.npy',
     "mask" : 'mask.npy',
-    "bsize" : 512,# Batch size during training.
+    "bsize" : 256,# Batch size during training.
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
     'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
