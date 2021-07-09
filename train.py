@@ -23,7 +23,7 @@ print("Random Seed: ", seed)
 params = {
     "file_path" : 'train.npy',
     "mask" : 'mask.npy',
-    "bsize" : 128,# Batch size during training.
+    "bsize" : 256,# Batch size during training.
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
     'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
@@ -160,31 +160,19 @@ for epoch in range(params['nepochs']):
         # will only update the parameters of the generator. The discriminator
         # gradients will be set to zero in the next iteration by netD.zero_grad()
         errG.backward()
-
         D_G_z2 = output.mean().item()
         # Update generator parameters.
         optimizerG.step()
-
-        # Check progress of training.
-        if i%50 == 0:
-            print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-                  % (epoch, params['nepochs'], i, len(true_dataloader),
-                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
-
-        # Save the losses for plotting.
-        G_losses.append(errG.item())
-        D_losses.append(errD.item())
-
-        # Check how the generator is doing by saving G's output on a fixed noise.
-        if (iters % 100 == 0) or ((epoch == params['nepochs']-1) and (i == len(true_dataloader)-1)):
-            with torch.no_grad():
-                fake_data = netG(masked_data).detach().cpu()
-            img_list.append(vutils.make_grid(fake_data, padding=2, normalize=True))
-
         iters += 1
 
     # Save the model.
     if epoch % params['save_epoch'] == 0:
+        print('[%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
+                  % (epoch, params['nepochs'],
+                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+        with torch.no_grad():
+                fake_data = netG(masked_data).detach().cpu().numpy()
+                plt.imshow(fake_data)
         torch.save({
             'generator' : netG.state_dict(),
             'discriminator' : netD.state_dict(),
@@ -201,7 +189,7 @@ torch.save({
             'optimizerD' : optimizerD.state_dict(),
             'params' : params
             }, 'model/model_final.pth')
-
+'''
 # Plot the training losses.
 plt.figure(figsize=(10,5))
 plt.title("Generator and Discriminator Loss During Training")
@@ -219,3 +207,4 @@ ims = [[plt.imshow(np.transpose(i,(1,2,0)), animated=True)] for i in img_list]
 anim = animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=1000, blit=True)
 plt.show()
 anim.save('celeba.gif', dpi=80, writer='imagemagick')
+'''
