@@ -38,7 +38,7 @@ class Dataset(data.Dataset):
             csv_file (string): Path to the csv file with annotations.
         """
         super(data.Dataset, self).__init__()
-        self.npmaps = np.load(file_path)
+        self.npmaps = np.load(file_path)/255
         self.mask = mask
         if mask==True:
             self.mask_vec = np.load(mask_file)
@@ -50,5 +50,6 @@ class Dataset(data.Dataset):
         sample = self.npmaps[idx]
         if self.mask==True:
             masked_sample = sample*self.mask_vec
+            masked_sample[masked_sample==0]=-1
             return torch.Tensor(masked_sample)
         return torch.Tensor(sample)
