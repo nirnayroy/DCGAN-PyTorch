@@ -163,7 +163,6 @@ for epoch in range(params['nepochs']):
         D_G_z2 = output.mean().item()
         # Update generator parameters.
         optimizerG.step()
-        print(i)
         iters += 1
 
     # Save the model.
