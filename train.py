@@ -99,8 +99,8 @@ for epoch in range(params['nepochs']):
     for i, data in enumerate(zip(true_dataloader, masked_dataloader), 0):
         # Transfer data tensor to GPU/CPU (device)
         real_data, masked_data = data
-        real_data.resize_((params['bsize'], 1, 140, 280))
-        masked_data.resize_((params['bsize'], 1, 140, 280))
+        real_data.resize_((params['bsize'], params['nc'], 140, 280))
+        masked_data.resize_((params['bsize'], params['nc'], 140, 280))
         #print(list(real_data.shape))
         real_data = real_data.to(device)
         masked_data = masked_data.to(device)
@@ -127,7 +127,7 @@ for epoch in range(params['nepochs']):
         # Generate fake data (images).
         fake_data = netG(masked_data).to(device)
         # Create labels for fake data. (label=0)
-        label.fill_(fake_label  )
+        label.fill_(fake_label)
         # Calculate the output of the discriminator of the fake data.
         # As no gradients w.r.t. the generator parameters are to be
         # calculated, detach() is used. Hence, only gradients w.r.t. the
