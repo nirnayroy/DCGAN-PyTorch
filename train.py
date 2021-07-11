@@ -24,6 +24,8 @@ params = {
     "file_path" : 'train.npy',
     "mask" : 'mask.npy',
     "bsize" : 256,# Batch size during training.
+    "height" : 140,# height of image
+    "width" : 280,# width of image
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
     'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
@@ -73,7 +75,7 @@ print(netD)
 # Binary Cross Entropy loss function.
 criterion = nn.BCELoss()
 
-fixed_noise = torch.randn(64, params['nz'], 1, 1, device=device)
+mask =  torch.from_numpy(np.load(params['mask']))
 
 real_label = 1
 fake_label = 0
@@ -99,8 +101,8 @@ for epoch in range(params['nepochs']):
     for i, data in enumerate(zip(true_dataloader, masked_dataloader), 0):
         # Transfer data tensor to GPU/CPU (device)
         real_data, masked_data = data
-        real_data.resize_((params['bsize'], params['nc'], 140, 280))
-        masked_data.resize_((params['bsize'], params['nc'], 140, 280))
+        real_data.resize_((params['bsize'], params['nc'], params['height'], params['width']))
+        masked_data.resize_((params['bsize'], params['nc'], params['height'], params['width']))
         #print(list(real_data.shape))
         real_data = real_data.to(device)
         masked_data = masked_data.to(device)
@@ -126,6 +128,7 @@ for epoch in range(params['nepochs']):
         #noise = torch.randn(b_size, params['nz'], 1, 1, device=device)
         # Generate fake data (images).
         fake_data = netG(masked_data).to(device)
+        fake_data = (1.-mask)*fake_data + masked_data
         # Create labels for fake data. (label=0)
         label.fill_(fake_label)
         # Calculate the output of the discriminator of the fake data.
