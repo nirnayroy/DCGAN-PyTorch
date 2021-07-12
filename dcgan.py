@@ -123,14 +123,17 @@ if __name__ == "__main__":
     print(netG)
     
     train = np.load(params['file_path'])/255
-    train = torch.from_numpy(train[0:2])
+    train = torch.from_numpy(train[0:2].float())
     mask = np.load(params['mask'])
-    mask =  torch.from_numpy(mask)
+    mask =  torch.from_numpy(mask.float())
     
     masked_img = train*mask
+    print(train.shape)
+    print(mask.shape)
     print(masked_img.shape)
+    print(masked_img.reshape(-1, 1, 140, 280).shape)
     with torch.no_grad():
-        generated_img = netG(masked_img.reshape(-1, 1, 140, 280).float()).detach()
+        generated_img = netG(masked_img).detach()
         #generated_img = (1.-mask)*generated_img + masked_img
     print(generated_img.shape)
 
