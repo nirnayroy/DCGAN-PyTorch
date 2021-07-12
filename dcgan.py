@@ -121,9 +121,6 @@ if __name__ == "__main__":
     netG = netG.to(device)
     print(netG)
     
-    fake_data = netG(masked_data).to(device)
-    fake_data = (1.-mask)*fake_data + masked_data
-    
     train = np.load(params['file_path'])/255
     train = torch.from_numpy(train)
     mask = np.load(params['mask'])
