@@ -95,3 +95,45 @@ class Discriminator(nn.Module):
         x = F.relu(nn.Linear(40, 10).to(device)(x))
         x = torch.sigmoid((nn.Linear(10, 1).to(device)(x)))
         return x
+    
+if __name__ == "__main__":
+    
+    device = torch.device("cuda:0" if(torch.cuda.is_available()) else "cpu")
+    print(device, " will be used.\n")
+    
+    params = {
+    "file_path" : 'train.npy',
+    "mask" : 'mask.npy',
+    "bsize" : 256,# Batch size during training.
+    "height" : 140,# height of image
+    "width" : 280,# width of image
+    'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
+    'nz' : 100,# Size of the Z latent vector (the input to the generator).
+    'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
+    'ndf' : 64, # Size of features maps in the discriminator. The depth will be multiples of this.
+    'nepochs' : 10,# Number of training epochs.
+    'lr' : 0.0002,# Learning rate for optimizers
+    'beta1' : 0.5,# Beta1 hyperparam for Adam optimizer
+    'save_epoch' : 1}# Save step.
+    
+    netG = Generator(params)
+    netG.apply(weights_init)
+    netG = netG.to(device)
+    print(netG)
+    
+    fake_data = netG(masked_data).to(device)
+    fake_data = (1.-mask)*fake_data + masked_data
+    
+    train = np.load(params['file_path'])/255
+    train = torch.from_numpy(train)
+    mask = np.load(params['mask'])
+    mask =  torch.from_numpy(mask)
+    
+    masked_img = train[0]*mask
+    print(masked_img.shape)
+    with torch.no_grad():
+        generated_img = netG(masked_img.reshape(1, 1, 140, 280).float()).detach()
+        generated_img = (1.-mask)*generated_img + masked_img
+    print(generated_img.shape)
+
+    
