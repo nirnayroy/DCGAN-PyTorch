@@ -133,7 +133,7 @@ if __name__ == "__main__":
     print(masked_img.shape)
 
     with torch.no_grad():
-        generated_img = netG(masked_img.reshape(-1, 1, 140, 280)).float().detach()
+        generated_img = netG(masked_img.reshape(-1, 1, 140, 280).float()).detach()
         #generated_img = (1.-mask)*generated_img + masked_img
     print(generated_img.shape)
 
