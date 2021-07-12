@@ -45,7 +45,7 @@ class Generator(nn.Module):
 
         # Input Dimension: (ngf) * 140 * 70
         self.tconv3 = nn.ConvTranspose2d(params['ngf'], params['nc'],
-            4, padding='same', bias=False)
+            4, padding='valid', bias=False)
         #Output Dimension: (nc) x 280 x 140
 
     def forward(self, x):
