@@ -45,7 +45,7 @@ class Generator(nn.Module):
 
         # Input Dimension: (ngf) * 140 * 70
         self.tconv3 = nn.ConvTranspose2d(params['ngf'], params['nc'],
-            4, 2, 1, bias=False)
+            4, padding='same', bias=False)
         #Output Dimension: (nc) x 280 x 140
 
     def forward(self, x):
@@ -54,7 +54,7 @@ class Generator(nn.Module):
         x = F.relu(self.bn3(self.conv3(x)))
         x = F.relu(self.bn4(self.tconv1(x)))
         x = F.relu(self.bn5(self.tconv2(x)))
-        x = torch.tanh(self.tconv3(x))
+        x = self.tconv3(x)
         return x
 
 # Define the Discriminator Network
