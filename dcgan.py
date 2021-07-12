@@ -123,9 +123,9 @@ if __name__ == "__main__":
     print(netG)
     
     train = np.load(params['file_path'])/255
-    train = torch.from_numpy(train[0:2].float())
+    train = torch.from_numpy(float(train[0:2]))
     mask = np.load(params['mask'])
-    mask =  torch.from_numpy(mask.float())
+    mask =  torch.from_numpy(float(mask))
     
     masked_img = train*mask
     print(train.shape)
