@@ -128,13 +128,13 @@ if __name__ == "__main__":
     mask =  torch.from_numpy(mask)
     
     masked_img = train*mask
-    print(train.shape)
-    print(mask.shape)
-    print(masked_img.shape)
+    print('train shape',train.shape)
+    print('mask shape',mask.shape)
+    print('masked image shape', masked_img.shape)
 
     with torch.no_grad():
         generated_img = netG(masked_img.reshape(-1, 1, 140, 280).float()).detach()
-        generated_img = (1.-mask.reshape(-1, 1, 140, 280))*generated_img + masked_img
+        generated_img = (1.-mask)*generated_img + masked_img
     print(generated_img.shape)
 
     
