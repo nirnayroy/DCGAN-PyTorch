@@ -75,7 +75,7 @@ print(netD)
 # Binary Cross Entropy loss function.
 criterion = nn.BCELoss()
 
-mask =  torch.from_numpy(np.load(params['mask'])).reshape((-1, params['nc'], params['height'], params['width']))
+mask =  torch.from_numpy(np.load(params['mask'])).reshape((-1, params['nc'], params['height'], params['width'])).to(device)
 
 real_label = 1
 fake_label = 0
