@@ -175,7 +175,8 @@ for epoch in range(params['nepochs']):
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
         with torch.no_grad():
             fake_data = netG(masked_data).detach().cpu().numpy()
-            plt.imshow(fake_data[0,:,:,0])
+            fake_data = (1.-mask)*fake_data + masked_data
+            plt.imshow(fake_data[0,0,:,:])
             plt.savefig('op_epoch_{}'.format(epoch))
         torch.save({
             'generator' : netG.state_dict(),
