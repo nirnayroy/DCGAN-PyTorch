@@ -38,7 +38,7 @@ class Dataset(data.Dataset):
             csv_file (string): Path to the csv file with annotations.
         """
         super(data.Dataset, self).__init__()
-        self.npmaps = np.load(file_path)/255
+        self.npmaps = np.load(file_path)
         self.mask = mask
         if mask==True:
             self.mask_vec = np.load(mask_file)
