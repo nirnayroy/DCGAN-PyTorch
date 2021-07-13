@@ -23,17 +23,17 @@ print("Random Seed: ", seed)
 params = {
     "file_path" : 'train.npy',
     "mask" : 'mask.npy',
-    "bsize" : 256,# Batch size during training.
+    "bsize" : 350,# Batch size during training.
     "height" : 140,# height of image
     "width" : 280,# width of image
     'nc' : 1,# Number of channles in the training images. For coloured images this is 3.
     'nz' : 100,# Size of the Z latent vector (the input to the generator).
     'ngf' : 64,# Size of feature maps in the generator. The depth will be multiples of this.
     'ndf' : 64, # Size of features maps in the discriminator. The depth will be multiples of this.
-    'nepochs' : 10,# Number of training epochs.
+    'nepochs' : 50,# Number of training epochs.
     'lr' : 0.0002,# Learning rate for optimizers
     'beta1' : 0.5,# Beta1 hyperparam for Adam optimizer
-    'save_epoch' : 1}# Save step.
+    'save_epoch' : 10}# Save step.
 
 # Use GPU is available else use CPU.
 device = torch.device("cuda:0" if(torch.cuda.is_available()) else "cpu")
