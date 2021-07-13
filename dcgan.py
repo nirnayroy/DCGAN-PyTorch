@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda:0" if(torch.cuda.is_available()) else "cpu")
 def weights_init(w):
@@ -138,4 +139,5 @@ if __name__ == "__main__":
         generated_img = (1.-mask)*generated_img + masked_img
     print(generated_img.shape)
 
-    
+    plt.imshow(generated_img.numpy()[0,0,:,:])
+    plt.savefig('test_img')
