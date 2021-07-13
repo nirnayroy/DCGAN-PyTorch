@@ -114,7 +114,7 @@ for epoch in range(params['nepochs']):
         netD.zero_grad()
         # Create labels for the real data. (label=1)
         label = torch.full((b_size, ), real_label, device=device)
-        output = netD(real_data.float())
+        output = netD(real_data.float()).float()
         #print(list(output.shape)) 
         #print(list(label.shape))       
         output = output.view(-1)
@@ -155,7 +155,7 @@ for epoch in range(params['nepochs']):
         label.fill_(real_label)
         # No detach() is used here as we want to calculate the gradients w.r.t.
         # the generator this time.
-        output = netD(fake_data).to(device).view(-1)
+        output = netD(fake_data).float().to(device).view(-1)
         errG = criterion(output.float(), label.float())
         # Gradients for backpropagation are calculated.
         # Gradients w.r.t. both the generator and the discriminator
