@@ -137,7 +137,7 @@ for epoch in range(params['nepochs']):
         # discriminator parameters will be calculated.
         # This is done because the loss functions for the discriminator
         # and the generator are slightly different.
-        output = netD(fake_data.detach()).float().view(-1)
+        output = netD(fake_data.float().detach()).float().view(-1)
         errD_fake = criterion(output.float(), label.float())
         # Calculate gradients for backpropagation.
         errD_fake.backward()
@@ -155,7 +155,7 @@ for epoch in range(params['nepochs']):
         label.fill_(real_label)
         # No detach() is used here as we want to calculate the gradients w.r.t.
         # the generator this time.
-        output = netD(fake_data).float().to(device).view(-1)
+        output = netD(fake_data.float()).float().to(device).view(-1)
         errG = criterion(output.float(), label.float())
         # Gradients for backpropagation are calculated.
         # Gradients w.r.t. both the generator and the discriminator
