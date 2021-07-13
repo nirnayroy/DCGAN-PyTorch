@@ -114,7 +114,7 @@ for epoch in range(params['nepochs']):
         netD.zero_grad()
         # Create labels for the real data. (label=1)
         label = torch.full((b_size, ), real_label, device=device)
-        output = netD(real_data)
+        output = netD(real_data.float())
         #print(list(output.shape)) 
         #print(list(label.shape))       
         output = output.view(-1)
